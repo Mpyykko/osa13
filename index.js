@@ -38,6 +38,8 @@ Blog.init({
   modelName: 'blog'
 })
 
+Blog.sync()
+
 const syncDatabase = async () => {
   try {
     await sequelize.authenticate()
@@ -61,6 +63,16 @@ app.get('/api/blogs', async (req, res) => {
   }
 })
 
+app.get('/api/blogs/:id', async (req, res) => {
+    const blog = await Blog.findByPk(req.params.id)
+    if (blog) {
+        console.log(blog.toJSON())
+        res.json(blog)
+    } else {
+        res.status(404).end()
+    }
+  })
+
 
 app.post('/api/blogs', async (req, res) => {
   const { title, author, url } = req.body
@@ -76,6 +88,35 @@ app.post('/api/blogs', async (req, res) => {
     res.status(500).json({ error: 'Unable to add blog' })
   }
 })
+
+app.put('/api/blogs/:id', async (req, res) => {
+    const blog = await Blog.findByPk(req.params.id)
+    if (blog) {
+      blog.important = req.body.important
+      await blog.save()
+      res.json(blog)
+    } else {
+      res.status(404).end()
+    }
+  })
+
+  
+app.delete('/api/blogs/:id', async (req, res) => {
+    try {
+      const blog = await Blog.findByPk(req.params.id)
+      
+      if (blog) {
+        await blog.destroy()
+        res.status(204).end()
+      } else {
+        res.status(404).json({ error: 'Blog not found' })
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Unable to delete blog' })
+    }
+})
+  
+
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
