@@ -10,30 +10,30 @@ Blog.init(
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
     },
     author: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     url: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     title: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     likes: {
       type: DataTypes.INTEGER,
-      defaultValue: 0
-    }
+      defaultValue: 0,
+    },
   },
   {
     sequelize,
     modelName: 'Blog',
     timestamps: false,
-    underscored: true
+    underscored: true,
   }
 );
 
@@ -46,7 +46,7 @@ const main = async () => {
       return;
     }
 
-    blogs.forEach(blog => {
+    blogs.forEach((blog) => {
       console.log(`${blog.author}: '${blog.title}', ${blog.likes} likes`);
     });
   } catch (error) {

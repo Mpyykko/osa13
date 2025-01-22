@@ -9,11 +9,14 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9",
+    "prettier": "^3.4.2",
     "sequelize-cli": "^6.6.2"
   },
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "cli": "node cli.js"
+    "cli": "node cli.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   }
 }
