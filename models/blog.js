@@ -7,7 +7,8 @@ Blog.init({
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
-  },  title: {
+  },
+  title: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -22,6 +23,13 @@ Blog.init({
   likes: {
     type: DataTypes.INTEGER,
     defaultValue: 0
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   }
 }, {
   sequelize,

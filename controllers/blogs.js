@@ -1,10 +1,37 @@
 const router = require('express').Router()
-const { Blog } = require('../models')
+const { Blog, User } = require('../models')
+
+const jwt = require('jsonwebtoken')
+const { SECRET } = require('../util/config')
+
+const { userExtractor } = require('../middleware/auth')
+
+
+const tokenExtractor = (req, res, next) => {
+  const authorization = req.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    try {
+      req.decodedToken = jwt.verify(authorization.substring(7), SECRET)
+    } catch (error) {
+      return res.status(401).json({ error: 'token invalid' })
+    }
+  } else {
+    return res.status(401).json({ error: 'token missing' })
+  }
+  next()
+}
+
 
 ////////////////////////
 router.get('/', async (req, res) => {
   try {
-    const blogs = await Blog.findAll()
+    const blogs = await Blog.findAll({
+      attributes: { exclude: ['userId'] },
+      include: {
+        model: User,
+        attributes: ['name']
+      }
+    })
     res.json(blogs)
   } catch (error) {
     res.status(500).json({ error: 'Unable to fetch blogs' })
@@ -12,43 +39,38 @@ router.get('/', async (req, res) => {
 })
 
 ////////////////////////
-router.post('/', async (req, res) => {
-  const { title, author, url } = req.body
-
+router.post('/', userExtractor, async (req, res) => {
   try {
+    const user = req.user
+    const { title, author, url } = req.body
     const newBlog = await Blog.create({
       title,
       author,
-      url
+      url,
+      userId: user.id,
     })
+
     res.status(201).json(newBlog)
   } catch (error) {
-    res.status(500).json({ error: 'Unable to add blog' })
+    res.status(400).json({ error: 'Unable to add blog' })
   }
 })
 
-////////////////////////
-router.get('/:id', async (req, res) => {
-  const blog = await Blog.findByPk(req.params.id)
-  if (blog) {
-    res.json(blog)
-  } else {
-    res.status(404).end()
-  }
-})
+
 
 ////////////////////////
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', userExtractor, async (req, res) => {
   try {
     const blog = await Blog.findByPk(req.params.id)
-    if (blog) {
-      await blog.destroy()
-      res.status(204).end()
-    } else {
-      res.status(404).json({ error: 'Blog not found' })
+
+    if (blog.userId !== req.user.id) {
+      return res.status(403).json({ error: 'No can do' })
     }
+
+    await blog.destroy()
+    res.status(204).end()
   } catch (error) {
-    res.status(500).json({ error: 'Unable to delete blog' })
+    res.status(500).json({ error: 'Try again later' })
   }
 })
 
