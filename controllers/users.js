@@ -5,14 +5,23 @@ const { User, Blog } = require('../models');
 router.get('/', async (req, res) => {
   try {
     const users = await User.findAll({
-      include: {
-        model: Blog,
-        attributes: ['title', 'author', 'url', 'likes'],
-      },
+      include: [
+        {
+          model: Blog,
+          attributes: ['title', 'author', 'url', 'likes'],
+        },
+        {
+          model: Team,
+          attributes: ['name', 'id'],
+          through: {
+            attributes: []
+          }
+        },
+      ],
     });
     res.json(users);
   } catch (error) {
-    res.status(500).json({ error: 'Unable to fetch users' });
+    res.status(500).json({ error: 'No users' });
   }
 });
 
