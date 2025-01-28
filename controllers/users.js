@@ -1,7 +1,7 @@
 const router = require('express').Router();
-const { User, Blog } = require('../models');
+const { User, Blog, Team, ReadingList } = require('../models');
 
-//////////////////////////////
+////////////////////////////////////////
 router.get('/', async (req, res) => {
   try {
     const users = await User.findAll({
@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-//////////////////////////////
+////////////////////////////////////////
 router.post('/', async (req, res, next) => {
   try {
     const { name, username, password } = req.body;
@@ -42,17 +42,44 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-//////////////////////////////
+
+////////////////////////////////////////
 router.get('/:id', async (req, res) => {
-  const user = await User.findByPk(req.params.id);
-  if (user) {
+  try {
+    const readParam = req.query.read;
+    const where = {};
+    
+    if (readParam === 'true' || readParam === 'false') {
+      where.read = readParam === 'true';
+    }
+
+    const user = await User.findByPk(req.params.id, {
+      include: [
+        {
+          model: Blog,
+          as: 'reading_list',
+          through: {
+            model: ReadingList,
+            as: 'reading_list_data',
+            where: where,
+            attributes: ['id', 'read']
+          },
+          attributes: ['id', 'title', 'url', 'author', 'likes']
+        }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).end();
+    }
+
     res.json(user);
-  } else {
-    res.status(404).end();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
-//////////////////////////////
+////////////////////////////////////////
 router.put('/:username', async (req, res, next) => {
   try {
     const { username } = req.params;

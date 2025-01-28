@@ -4,6 +4,7 @@ const blogsRouter = require('./controllers/blogs');
 const usersRouter = require('./controllers/users');
 const loginRouter = require('./controllers/login');
 const authorsRouter = require('./controllers/authors');
+const readingListRouter = require('./controllers/readinglists')
 const app = express();
 const config = require('./util/config');
 const errorHandler = require('./middleware/errorHandler');
@@ -19,6 +20,7 @@ app.use('/api/blogs', blogsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRouter);
 app.use('/api/authors', authorsRouter);
+app.use('/api/readinglists', readingListRouter)
 
 app.use(errorHandler);
 
