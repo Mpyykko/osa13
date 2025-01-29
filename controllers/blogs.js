@@ -2,54 +2,49 @@ const router = require('express').Router();
 const { Blog, User } = require('../models');
 
 const { userExtractor } = require('../middleware/auth');
+const { sessionValidator } = require('../middleware/sessionValidator');
 const { Op } = require('sequelize');
 
 ////////////////////////
 router.get('/', async (req, res) => {
   try {
-    const where = {};
-
-    if (req.query.search) {
-      where[Op.or] = [
-        { title: { [Op.iLike]: `%${req.query.search}%` } },
-        { author: { [Op.iLike]: `%${req.query.search}%` } },
-      ];
-    }
-
     const blogs = await Blog.findAll({
-      where,
-      attributes: { exclude: ['userId'] },
       include: {
         model: User,
         attributes: ['name'],
       },
       order: [['likes', 'DESC']],
     });
-    res.json(blogs);
+
+    const blogsJSON = blogs.map(blog => blog.toJSON());
+    
+    console.log('Löydetyt blogit:', blogsJSON);
+    res.json(blogsJSON);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Unable to fetch blogs' });
   }
 });
 
+
+
 ////////////////////////
-router.post('/', userExtractor, async (req, res) => {
+router.post('/', sessionValidator, async (req, res) => {
   try {
-    const user = req.user;
-    const { title, author, url, likes } = req.body;
-    const newBlog = await Blog.create({
+    const { title, author, url } = req.body;
+
+    const blog = await Blog.create({
       title,
       author,
       url,
-      userId: user.id,
-      likes: likes || 0,
+      userId: req.user.id,
     });
 
-    res.status(201).json(newBlog);
+    res.status(201).json(blog);
   } catch (error) {
-    res.status(400).json({ error: 'Unable to add blog' });
+    res.status(400).json({ error: 'Unable to create blog' });
   }
 });
-
 ////////////////////////
 router.delete('/:id', userExtractor, async (req, res) => {
   try {

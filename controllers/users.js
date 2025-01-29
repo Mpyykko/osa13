@@ -48,7 +48,7 @@ router.get('/:id', async (req, res) => {
   try {
     const readParam = req.query.read;
     const where = {};
-    
+
     if (readParam === 'true' || readParam === 'false') {
       where.read = readParam === 'true';
     }
@@ -57,14 +57,12 @@ router.get('/:id', async (req, res) => {
       include: [
         {
           model: Blog,
-          as: 'reading_list',
+          as: 'readinglist',
           through: {
-            model: ReadingList,
-            as: 'reading_list_data',
-            where: where,
-            attributes: ['id', 'read']
+            attributes: ['id', 'read'],
+            where: where
           },
-          attributes: ['id', 'title', 'url', 'author', 'likes']
+          attributes: ['id', 'title', 'author', 'url', 'likes']
         }
       ]
     });
@@ -78,6 +76,8 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
 
 ////////////////////////////////////////
 router.put('/:username', async (req, res, next) => {
@@ -103,5 +103,7 @@ router.put('/:username', async (req, res, next) => {
     next(error);
   }
 });
+
+
 
 module.exports = router;

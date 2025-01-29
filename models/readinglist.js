@@ -33,7 +33,8 @@ ReadingList.init({
 }, {
   sequelize,
   underscored: true,
-  modelName: 'readingList'
+  modelName: 'readingList',
+  tableName: 'readinglist' 
 });
 
 module.exports = ReadingList;

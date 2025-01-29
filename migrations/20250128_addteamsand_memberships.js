@@ -1,7 +1,9 @@
-const { DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
+const sequelize = new Sequelize('postgres://postgres:mysecretpassword@localhost:5432/postgres');
+const queryInterface = sequelize.getQueryInterface();
 
 module.exports = {
-  up: async (queryInterface) => {
+  up: async () => {
     await queryInterface.createTable('teams', {
       id: {
         type: DataTypes.INTEGER,
@@ -12,6 +14,16 @@ module.exports = {
         type: DataTypes.TEXT,
         allowNull: false,
         unique: true,
+      },
+      created_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
       },
     });
 
@@ -31,10 +43,20 @@ module.exports = {
         allowNull: false,
         references: { model: 'teams', key: 'id' },
       },
+      created_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
     });
   },
 
-  down: async (queryInterface) => {
+  down: async () => {
     await queryInterface.dropTable('memberships');
     await queryInterface.dropTable('teams');
   },
